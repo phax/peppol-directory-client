@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (C) 2026 Philip Helger (www.helger.com)
+    Copyright (C) 2015-2026 Philip Helger (www.helger.com)
     philip[at]helger[dot]com
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,16 +20,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.helger</groupId>
-    <artifactId>phoss-directory-client-parent-pom</artifactId>
+    <groupId>com.helger.peppol.directory</groupId>
+    <artifactId>peppol-directory-client-parent-pom</artifactId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
-  <artifactId>phoss-directory-searchclient</artifactId>
+  <artifactId>peppol-directory-client</artifactId>
   <packaging>jar</packaging>
-  <name>phoss-directory-searchclient</name>
-  <description>The Peppol Directory client that can be used by arbitrary applications to query the Directory search REST API</description>
-  <url>https://github.com/phax/peppol-directory-client/phoss-directory-searchclient</url>
-  <inceptionYear>2026</inceptionYear>
+  <name>peppol-directory-client</name>
+  <description>The Peppol Directory client that can be used by SMP servers to register/uregister from Directory</description>
+  <url>https://github.com/phax/peppol-directory-client/peppol-directory-client</url>
+  <inceptionYear>2015</inceptionYear>
   <licenses>
     <license>
       <name>Apache 2</name>
@@ -55,25 +55,28 @@
       <artifactId>ph-commons</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.helger.web</groupId>
-      <artifactId>ph-httpclient</artifactId>
+      <groupId>com.helger.commons</groupId>
+      <artifactId>ph-datetime</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.helger</groupId>
-      <artifactId>phoss-directory-searchapi</artifactId>
+      <groupId>com.helger.commons</groupId>
+      <artifactId>ph-config</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.helger.web</groupId>
+      <artifactId>ph-httpclient</artifactId>
     </dependency>
     <dependency>
       <groupId>com.helger.peppol</groupId>
       <artifactId>peppol-id</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <scope>test</scope>
+      <groupId>com.helger.peppol</groupId>
+      <artifactId>peppol-commons</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.sun.xml.bind</groupId>
-      <artifactId>jaxb-impl</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

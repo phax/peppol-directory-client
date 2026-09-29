@@ -1,8 +1,8 @@
 # peppol-directory-client
 
 <!-- ph-badge-start -->
-[![Sonatype Central](https://maven-badges.sml.io/sonatype-central/com.helger/phoss-directory-client-parent-pom/badge.svg)](https://maven-badges.sml.io/sonatype-central/com.helger/phoss-directory-client-parent-pom/)
-[![javadoc](https://javadoc.io/badge2/com.helger/phoss-directory-client/javadoc.svg)](https://javadoc.io/doc/com.helger/phoss-directory-client)
+[![Sonatype Central](https://maven-badges.sml.io/sonatype-central/com.helger.peppol.directory/peppol-directory-client-parent-pom/badge.svg)](https://maven-badges.sml.io/sonatype-central/com.helger.peppol.directory/peppol-directory-client-parent-pom/)
+[![javadoc](https://javadoc.io/badge2/com.helger.peppol.directory/peppol-directory-client/javadoc.svg)](https://javadoc.io/doc/com.helger.peppol.directory/peppol-directory-client)
 
 > If this project saved you some time or made your day a little easier, a star would mean a lot — it helps others find it too.
 <!-- ph-badge-end -->
@@ -13,12 +13,15 @@ This project is part of my Peppol solution stack. See https://github.com/phax/pe
 
 These libraries were part of https://github.com/phax/phoss-directory up to and including v0.19.1 and were extracted
   into this repository, so that they no longer share the release cycle and the Java baseline of the Directory server.
-The Maven coordinates are unchanged - only the version line restarts at 1.0.0.
+The Maven coordinates were changed on that occasion - the group ID is now `com.helger.peppol.directory` and the
+  artifact IDs were renamed from `phoss-directory-*` to `peppol-directory-*` - because these libraries talk to the
+  Peppol Directory and are not bound to a specific Directory implementation.
+See the [Migration](#migration-from-phoss-directory) section below.
 
 This project is split into the following sub-projects:
-* `phoss-directory-client` - a client library to be added to SMP servers to force indexing in the PD
-* `phoss-directory-searchapi` - a library with the data structures and the constants of the Directory search REST API (since v0.7.2)
-* `phoss-directory-searchclient` - a client library to query the Directory search REST API (since v0.19.1)
+* `peppol-directory-client` - a client library to be added to SMP servers to force indexing in the PD (until v0.19.1: `phoss-directory-client`)
+* `peppol-directory-searchapi` - a library with the data structures and the constants of the Directory search REST API (since v0.7.2; until v0.19.1: `phoss-directory-searchapi`)
+* `peppol-directory-searchclient` - a client library to query the Directory search REST API (since v0.19.1; until v0.19.1: `phoss-directory-searchclient`)
 
 The Directory server itself - the indexer and the publisher web application - stays in https://github.com/phax/phoss-directory
 
@@ -28,6 +31,43 @@ The Directory server itself - the indexer and the publisher web application - st
 * Test version is available at https://test-directory.peppol.eu
     * It can only handle participants registered at the SMK
     * For the indexing REST API, a client certificate (SMP test) is needed
+
+# Migration from phoss-directory
+
+Up to and including v0.19.1 these libraries were released from https://github.com/phax/phoss-directory.
+Only the Maven coordinates changed - no source code change is needed.
+
+| up to v0.19.1 | since v1.0.0 |
+|---|---|
+| `com.helger:phoss-directory-client` | `com.helger.peppol.directory:peppol-directory-client` |
+| `com.helger:phoss-directory-searchapi` | `com.helger.peppol.directory:peppol-directory-searchapi` |
+| `com.helger:phoss-directory-searchclient` | `com.helger.peppol.directory:peppol-directory-searchclient` |
+| `com.helger:phoss-directory-parent-pom` (BOM import) | `com.helger.peppol.directory:peppol-directory-client-parent-pom` |
+
+```xml
+<!-- until v0.19.1 -->
+<dependency>
+  <groupId>com.helger</groupId>
+  <artifactId>phoss-directory-client</artifactId>
+  <version>0.19.1</version>
+</dependency>
+
+<!-- since v1.0.0 -->
+<dependency>
+  <groupId>com.helger.peppol.directory</groupId>
+  <artifactId>peppol-directory-client</artifactId>
+  <version>1.0.0</version>
+</dependency>
+```
+
+What did *not* change:
+* The Java package names and all class names are unchanged - `com.helger.pd.client`, `com.helger.pd.searchapi`, `com.helger.pd.searchapi.v1` and `com.helger.pd.searchclient`
+* The configuration property names of the PD Client (`pdclient.*`) are unchanged
+* The XML Schema in `peppol-directory-searchapi` is still contained at `/schemas/directory-search-result-list-v1.xsd`
+
+The old artifacts stay available on Maven Central in their released versions, but they will not receive updates any more.
+If you import `com.helger:phoss-directory-parent-pom` as a BOM only to resolve the version of the Directory client,
+  replace that import with `com.helger.peppol.directory:peppol-directory-client-parent-pom`.
 
 # Building requirements
 
@@ -115,7 +155,7 @@ The server limits the number of results that can be paged through to `CPDSearchA
 # PD Search API
 
 The PD Search API library contains the data structures and the constants of the Directory search REST API.
-It is used by `phoss-directory-searchclient` but can also be used stand alone - e.g. to parse a search result that was
+It is used by `peppol-directory-searchclient` but can also be used stand alone - e.g. to parse a search result that was
   retrieved by other means.
 
 * The JAXB classes in package `com.helger.pd.searchapi.v1` are generated from `directory-search-result-list-v1.xsd`,
@@ -128,6 +168,6 @@ It is used by `phoss-directory-searchclient` but can also be used stand alone - 
 
 v1.0.0 - work in progress
 * Extracted `phoss-directory-client`, `phoss-directory-searchapi` and `phoss-directory-searchclient` from https://github.com/phax/phoss-directory (last common release was v0.19.1) into this repository
-* The Maven group ID and the artifact IDs are unchanged - only the version line restarts at `1.0.0`
-* The new parent POM is `com.helger:phoss-directory-client-parent-pom` - SMP servers that import `com.helger:phoss-directory-parent-pom` as a BOM need to import the new one instead
+* Changed the Maven group ID to `com.helger.peppol.directory` and renamed the artifact IDs from `phoss-directory-*` to `peppol-directory-*`. All package and class names are unchanged - see the [Migration](#migration-from-phoss-directory) section
+* The new parent POM is `com.helger.peppol.directory:peppol-directory-client-parent-pom` - SMP servers that import `com.helger:phoss-directory-parent-pom` as a BOM need to import the new one instead
 * For the news of v0.19.1 and before see https://github.com/phax/phoss-directory

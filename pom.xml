@@ -24,10 +24,11 @@
     <artifactId>parent-pom</artifactId>
     <version>3.1.0</version>
   </parent>
-  <artifactId>phoss-directory-client-parent-pom</artifactId>
+  <groupId>com.helger.peppol.directory</groupId>
+  <artifactId>peppol-directory-client-parent-pom</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>phoss-directory-client-parent-pom</name>
+  <name>peppol-directory-client-parent-pom</name>
   <description>Base POM to build the phoss Directory client projects</description>
   <url>https://github.com/phax/peppol-directory-client</url>
   <inceptionYear>2015</inceptionYear>
@@ -63,7 +64,7 @@
 
   <properties>
     <!-- The baseline of the artifacts that are consumed by third parties (SMP servers embed
-         phoss-directory-client) - do not raise this without a good reason -->
+         peppol-directory-client) - do not raise this without a good reason -->
     <java.version>17</java.version>
 
     <jaxb-plugin.group>org.jvnet.jaxb</jaxb-plugin.group>
@@ -97,18 +98,18 @@
       </dependency>
 
       <dependency>
-        <groupId>com.helger</groupId>
-        <artifactId>phoss-directory-client</artifactId>
+        <groupId>com.helger.peppol.directory</groupId>
+        <artifactId>peppol-directory-client</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.helger</groupId>
-        <artifactId>phoss-directory-searchapi</artifactId>
+        <groupId>com.helger.peppol.directory</groupId>
+        <artifactId>peppol-directory-searchapi</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.helger</groupId>
-        <artifactId>phoss-directory-searchclient</artifactId>
+        <groupId>com.helger.peppol.directory</groupId>
+        <artifactId>peppol-directory-searchclient</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>
@@ -123,9 +124,9 @@
   </dependencies>
 
   <modules>
-    <module>phoss-directory-client</module>
-    <module>phoss-directory-searchapi</module>
-    <module>phoss-directory-searchclient</module>
+    <module>peppol-directory-client</module>
+    <module>peppol-directory-searchapi</module>
+    <module>peppol-directory-searchclient</module>
   </modules>
 
   <build>
