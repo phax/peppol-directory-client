@@ -257,7 +257,11 @@ public final class PDClientConfiguration
 
   /**
    * @return The proxy host to be used for "http" calls. May be <code>null</code>.
+   * @deprecated Since v1.0.0 - the proxy is configured from the standardized
+   *             <code>http.proxy.*</code> configuration properties by
+   *             {@link com.helger.httpclient.HttpClientSettingsConfig} instead.
    */
+  @Deprecated (forRemoval = true, since = "1.0.0")
   @Nullable
   public static String getHttpProxyHost ()
   {
@@ -266,7 +270,11 @@ public final class PDClientConfiguration
 
   /**
    * @return The proxy port to be used for "http" calls. Defaults to 0.
+   * @deprecated Since v1.0.0 - the proxy is configured from the standardized
+   *             <code>http.proxy.*</code> configuration properties by
+   *             {@link com.helger.httpclient.HttpClientSettingsConfig} instead.
    */
+  @Deprecated (forRemoval = true, since = "1.0.0")
   public static int getHttpProxyPort ()
   {
     return getConfig ().getAsIntOrFallback ("http.proxy.port", -1, "http.proxyPort");
@@ -276,22 +284,32 @@ public final class PDClientConfiguration
    * @return The username for proxy calls. Valid for https and https proxy. May be
    *         <code>null</code>.
    * @since 0.6.0
+   * @deprecated Since v1.0.0 - use the configuration property <code>http.proxy.username</code>
+   *             that is evaluated by {@link com.helger.httpclient.HttpClientSettingsConfig}
+   *             instead. This method only remains for the legacy property name
+   *             <code>proxy.username</code>.
    */
+  @Deprecated (forRemoval = true, since = "1.0.0")
   @Nullable
   public static String getProxyUsername ()
   {
-    return getConfig ().getAsStringOrFallback ("http.proxy.username", "proxy.username");
+    return getConfig ().getAsString ("proxy.username");
   }
 
   /**
    * @return The password for proxy calls. Valid for https and https proxy. May be
    *         <code>null</code>.
    * @since 0.6.0
+   * @deprecated Since v1.0.0 - use the configuration property <code>http.proxy.password</code>
+   *             that is evaluated by {@link com.helger.httpclient.HttpClientSettingsConfig}
+   *             instead. This method only remains for the legacy property name
+   *             <code>proxy.password</code>.
    */
+  @Deprecated (forRemoval = true, since = "1.0.0")
   @Nullable
   public static char [] getProxyPassword ()
   {
-    final String ret = getConfig ().getAsStringOrFallback ("http.proxy.password", "proxy.password");
+    final String ret = getConfig ().getAsString ("proxy.password");
     return ret == null ? null : ret.toCharArray ();
   }
 

@@ -20,7 +20,6 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore.PrivateKeyEntry;
 
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
-import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.ssl.PrivateKeyStrategy;
 import org.apache.hc.core5.ssl.SSLContexts;
 import org.apache.hc.core5.ssl.TrustStrategy;
@@ -32,6 +31,9 @@ import com.helger.annotation.Nonempty;
 import com.helger.base.enforce.ValueEnforcer;
 import com.helger.base.string.StringHelper;
 import com.helger.httpclient.HttpClientSettings;
+import com.helger.httpclient.HttpClientSettingsConfig;
+import com.helger.httpclient.HttpClientSettingsConfig.HttpClientConfig;
+import com.helger.httpclient.HttpProxySettings;
 import com.helger.httpclient.security.PrivateKeyStrategyFromAliasCaseInsensitive;
 import com.helger.httpclient.security.TrustStrategyTrustAll;
 import com.helger.security.keystore.LoadedKey;
@@ -62,7 +64,27 @@ public class PDHttpClientSettings extends HttpClientSettings
   }
 
   /**
-   * Overwrite all settings that can appear in the configuration file "pd-client.properties".
+   * Apply the deprecated PD client proxy credential properties, in case the standardized ones are
+   * not present.
+   *
+   * @param aProxySettings
+   *        The proxy settings to be filled. May not be <code>null</code>.
+   */
+  @Deprecated (forRemoval = true, since = "1.0.0")
+  @SuppressWarnings ("removal")
+  private static void _setLegacyProxyCredentials (@NonNull final HttpProxySettings aProxySettings)
+  {
+    final String sProxyUsername = PDClientConfiguration.getProxyUsername ();
+    if (StringHelper.isNotEmpty (sProxyUsername))
+    {
+      LOGGER.warn ("The support for the configuration properties 'proxy.username' and 'proxy.password' is deprecated. Use 'http.proxy.username' and 'http.proxy.password' instead.");
+      aProxySettings.setProxyCredentials (new UsernamePasswordCredentials (sProxyUsername,
+                                                                           PDClientConfiguration.getProxyPassword ()));
+    }
+  }
+
+  /**
+   * Overwrite all settings that can appear in the configuration.
    *
    * @param sTargetURI
    *        The target URI to connect to. Makes a difference if this is "http" or "https". May
@@ -73,28 +95,23 @@ public class PDHttpClientSettings extends HttpClientSettings
     ValueEnforcer.notEmpty (sTargetURI, "TargetURI");
     final boolean bUseHttps = EURLProtocol.HTTPS.isUsedInURL (sTargetURI);
 
-    // Proxy host
-    final String sProxyHost = PDClientConfiguration.getHttpProxyHost ();
-    final int nProxyPort = PDClientConfiguration.getHttpProxyPort ();
-    if (sProxyHost != null && nProxyPort > 0)
-    {
-      final HttpHost aProxyHost = new HttpHost (sProxyHost, nProxyPort);
-      LOGGER.info ("PD client uses proxy host " + aProxyHost);
-      getGeneralProxy ().setProxyHost (aProxyHost);
-    }
-    else
-      getGeneralProxy ().setProxyHost (null);
+    // Proxy - reset first, because this method may be called more than once
+    final HttpProxySettings aProxySettings = getGeneralProxy ();
+    aProxySettings.setProxyHost (null);
+    aProxySettings.setProxyCredentials (null);
+    aProxySettings.nonProxyHosts ().clear ();
 
-    // Proxy credentials
-    final String sProxyUsername = PDClientConfiguration.getProxyUsername ();
-    if (StringHelper.isNotEmpty (sProxyUsername))
-    {
-      LOGGER.info ("PD client uses proxy credentials");
-      getGeneralProxy ().setProxyCredentials (new UsernamePasswordCredentials (sProxyUsername,
-                                                                               PDClientConfiguration.getProxyPassword ()));
-    }
-    else
-      getGeneralProxy ().setProxyCredentials (null);
+    // Evaluate the standardized "http.proxy.*" configuration properties.
+    // No special configuration prefix needed
+    final HttpClientConfig aHCC = HttpClientConfig.create (PDClientConfiguration.getConfig (), "");
+    if (aHCC != null)
+      HttpClientSettingsConfig.assignConfigValuesForProxy (aProxySettings, aHCC);
+
+    if (aProxySettings.getProxyCredentials () == null)
+      _setLegacyProxyCredentials (aProxySettings);
+
+    if (aProxySettings.getProxyHost () != null)
+      LOGGER.info ("PD client uses proxy host " + aProxySettings.getProxyHost ());
 
     // Reset SSL stuff
     setHostnameVerifier (null);

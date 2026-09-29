@@ -100,6 +100,11 @@ Note: the configuration properties were heavily renamed in v0.10.0. Where an old
   fallback, it is shown in brackets. Since v1.0.0 the old names of the `pdclient.*` properties - the ones without the
   `pdclient.` prefix - are not evaluated anymore.
 
+Note: since v1.0.0 the `http.proxy.*` properties are no longer read by the PD Client itself. They are evaluated by the
+  standard mechanism of `ph-httpclient` (`HttpClientSettingsConfig`), so the PD Client supports the same proxy
+  properties as all the other Peppol components. The PD Client specific names `proxy.username` and `proxy.password`
+  are still evaluated as deprecated legacy, and log a warning when used.
+
 The following configuration items are supported by the PD Client:
 * **`pdclient.keystore.type`** (since v0.6.0) - the type of the keystore. Can be `JKS` or `PKCS12` (case insensitive). Mandatory since v1.0.0 - up to v0.19.1 it defaulted to `JKS`.
 * **`pdclient.keystore.path`** - the path to the keystore where the SMP certificate is contained
@@ -109,15 +114,20 @@ The following configuration items are supported by the PD Client:
 * **`pdclient.truststore.type`** (since v0.6.0) - the type of the keystore. Can be `JKS` or `PKCS12` (case insensitive). Mandatory since v1.0.0 - up to v0.19.1 it defaulted to `JKS`.
 * **`pdclient.truststore.path`** (since v0.5.1) - the path to the trust store, where the public certificates of the phoss Directory servers are contained. No default.
 * **`pdclient.truststore.password`** (since v0.5.1) - the password to open the truststore store. No default.
-* **`http.proxy.host`** (old: **`http.proxyHost`**) - the HTTP proxy host for HTTP connections only. No default.
-* **`http.proxy.port`** (old: **`http.proxyPort`**) - the HTTP proxy port for `http` connections only. No default.
+* **`http.proxy.enabled`** (since v1.0.0) - a boolean value to explicitly disable the proxy (`false`). If it is not set, a configured proxy host and port are sufficient to enable the proxy.
+* **`http.proxy.host`** (old: **`http.proxyHost`** or **`http.proxy.address`**) - the proxy host. No default. A proxy is only used if the host **and** the port are set.
+* **`http.proxy.port`** (old: **`http.proxyPort`**) - the proxy port. No default.
 * Removed in 0.10.0: ~**`https.proxyHost`** - the HTTP proxy host for `https` connections only. No default.~
 * Removed in 0.10.0: ~**`https.proxyPort`** - the HTTP proxy port for `https` connections only. No default.~
-* **`http.proxy.username`** (old: **`proxy.username`**) (since v0.6.0) - the proxy username if http or https proxy is enabled. No default. 
-* **`http.proxy.password`** (old: **`proxy.password`**) (since v0.6.0) - the proxy password if http or https proxy is enabled. No default.
+* **`http.proxy.username`** (old: **`http.proxyUsername`**; deprecated: **`proxy.username`**) (since v0.6.0) - the proxy username. No default. Proxy credentials are only used if the username **and** the password are set.
+* **`http.proxy.password`** (old: **`http.proxyPassword`**; deprecated: **`proxy.password`**) (since v0.6.0) - the proxy password. No default.
+* **`http.proxy.nonProxyHosts`** (old: **`http.nonProxyHosts`** or **`http.proxy.non-proxy`**) (since v1.0.0) - a `|` separated list of host names that are contacted directly instead of through the proxy. No default.
 * **`http.connect.timeout.ms`** (old: **`connect.timeout.ms`**) (since v0.6.0) - the connection timeout in milliseconds to connect to the server. The default value is `5000` (5 seconds). A value of `0` means indefinite. A value of `-1` means using the system default.
 * **`http.response.timeout.ms`** (old: **`http.request.timeout.ms`** or **`request.timeout.ms`**) (since v0.10.3) - the response/request/read timeout in milliseconds to read from the server. The default value is `10000` (10 seconds). A value of `0` means indefinite. A value of `-1` means using the system default.
 * **`https.hostname-verification.disabled`** (since v0.5.1) - a boolean value to indicate if https hostname verification should be disabled (`true`) or enabled (`false`). The default value is `true`.
+
+A template with all the supported properties and dummy values is contained in
+  [`example-config/application.properties`](example-config/application.properties).
 
 Example PD Client configuration properties:
 
@@ -180,8 +190,13 @@ v1.0.0 - work in progress
 * Changed the Maven group ID to `com.helger.peppol.directory` and renamed the artifact IDs from `phoss-directory-*` to `peppol-directory-*`. All package and class names are unchanged - see the [Migration](#migration-from-phoss-directory) section
 * The new parent POM is `com.helger.peppol.directory:peppol-directory-client-parent-pom` - SMP servers that import `com.helger:phoss-directory-parent-pom` as a BOM need to import the new one instead
 * Removed the support for the proprietary configuration files `pd-client.properties` and `private-pd-client.properties`. Only the `ph-config` default resolution is used now - place the properties in `application.properties` instead. The method `PDClientConfiguration.createPDClientValueProvider ()` was removed, because it only existed for that fallback
+* The HTTP proxy is configured with `HttpClientSettingsConfig.assignConfigValuesForProxy (...)` of `ph-httpclient` now, instead of with custom code in `PDHttpClientSettings`. As a result, the PD Client supports the same proxy configuration properties as the other Peppol components - including the new properties `http.proxy.enabled` and `http.proxy.nonProxyHosts` as well as the alternative names `http.proxy.address`, `http.proxyUsername` and `http.proxyPassword`
+    * The methods `PDClientConfiguration.getHttpProxyHost ()`, `getHttpProxyPort ()`, `getProxyUsername ()` and `getProxyPassword ()` are deprecated, because the proxy is not read via them anymore
+    * The PD Client specific property names `proxy.username` and `proxy.password` are still evaluated as deprecated legacy - using them logs a warning. `getProxyUsername ()` and `getProxyPassword ()` only resolve these two legacy names now
+    * Proxy credentials are only used if the username and the password are set - previously a username alone was sufficient
 * Removed the evaluation of the old names of the `pdclient.*` configuration properties - `keystore.type`, `keystore.path`, `keystore.password`, `keystore.key.alias`, `keystore.key.password`, `truststore.type`, `truststore.path` and `truststore.password` are not used as a fallback anymore. The old names of the `http.*` properties are still evaluated
 * Removed the implicit default `JKS` of the configuration properties `pdclient.keystore.type` and `pdclient.truststore.type`, so that a missing or unknown type is no longer silently interpreted as `JKS`. `PDClientConfiguration.getKeyStoreType ()` and `getTrustStoreType ()` are `@Nullable` now, and loading a key store without a configured type fails with a `NullPointerException` from `KeyStoreHelper`. The constant `PDClientConfiguration.DEFAULT_TRUSTSTORE_TYPE` was removed
 * Added `PDClient.toString ()`
+* Added the file `example-config/application.properties` that contains all supported configuration properties with dummy values, as a copy-paste template
 * Updated the JAXB binding file of `peppol-directory-searchapi` to the Jakarta EE binding namespace `https://jakarta.ee/xml/ns/jaxb` version 3.0, so that XJC no longer warns about the JAXB 2.x customization namespace
 * For the news of v0.19.1 and before see https://github.com/phax/phoss-directory
