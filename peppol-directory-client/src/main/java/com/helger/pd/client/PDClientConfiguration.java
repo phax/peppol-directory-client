@@ -16,7 +16,6 @@
  */
 package com.helger.pd.client;
 
-import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 
 import org.apache.hc.core5.util.Timeout;
@@ -27,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import com.helger.annotation.concurrent.GuardedBy;
 import com.helger.annotation.concurrent.ThreadSafe;
-import com.helger.annotation.misc.ChangeNextMajorRelease;
 import com.helger.base.concurrent.SimpleReadWriteLock;
 import com.helger.base.enforce.ValueEnforcer;
 import com.helger.base.equals.EqualsHelper;
@@ -36,10 +34,7 @@ import com.helger.config.IConfig;
 import com.helger.config.fallback.ConfigWithFallback;
 import com.helger.config.fallback.IConfigWithFallback;
 import com.helger.config.source.MultiConfigurationValueProvider;
-import com.helger.config.source.resource.properties.ConfigurationSourceProperties;
 import com.helger.httpclient.HttpClientSettings;
-import com.helger.io.resource.IReadableResource;
-import com.helger.io.resourceprovider.ReadableResourceProviderChain;
 import com.helger.security.keystore.EKeyStoreType;
 import com.helger.security.keystore.KeyStoreHelper;
 import com.helger.security.keystore.LoadedKey;
@@ -56,51 +51,21 @@ public final class PDClientConfiguration
 {
   private static final Logger LOGGER = LoggerFactory.getLogger (PDClientConfiguration.class);
 
-  /**
-   * @return The configuration value provider for phase4 that contains backward compatibility
-   *         support.
-   */
-  @NonNull
-  @ChangeNextMajorRelease ("Remove fallback to extra files")
-  public static MultiConfigurationValueProvider createPDClientValueProvider ()
-  {
-    // Start with default setup
-    final MultiConfigurationValueProvider ret = ConfigFactory.createDefaultValueProvider ();
+  private static final IConfigWithFallback DEFAULT_CONFIG = createDefaultConfiguration ();
 
-    final ReadableResourceProviderChain aResourceProvider = ConfigFactory.createDefaultResourceProviderChain ();
-
-    IReadableResource aRes;
-    final int nBasePrio = ConfigFactory.APPLICATION_PROPERTIES_PRIORITY;
-
-    // Lower priority than the standard files
-    aRes = aResourceProvider.getReadableResourceIf ("private-pd-client.properties", IReadableResource::exists);
-    if (aRes != null)
-    {
-      // 0.17.0 changed from warn to error
-      LOGGER.error ("The support for the properties file 'private-pd-client.properties' is deprecated. Place the properties in 'application.properties' instead.");
-      ret.addConfigurationSource (new ConfigurationSourceProperties (aRes, StandardCharsets.UTF_8), nBasePrio - 1);
-    }
-
-    aRes = aResourceProvider.getReadableResourceIf ("pd-client.properties", IReadableResource::exists);
-    if (aRes != null)
-    {
-      // 0.17.0 changed from warn to error
-      LOGGER.error ("The support for the properties file 'pd-client.properties' is deprecated. Place the properties in 'application.properties' instead.");
-      ret.addConfigurationSource (new ConfigurationSourceProperties (aRes, StandardCharsets.UTF_8), nBasePrio - 2);
-    }
-
-    return ret;
-  }
-
-  public static final EKeyStoreType DEFAULT_TRUSTSTORE_TYPE = EKeyStoreType.JKS;
-
-  private static final IConfigWithFallback DEFAULT_CONFIG = new ConfigWithFallback (createPDClientValueProvider ());
   private static final SimpleReadWriteLock RW_LOCK = new SimpleReadWriteLock ();
   @GuardedBy ("RW_LOCK")
   private static IConfigWithFallback s_aConfig = DEFAULT_CONFIG;
 
   private PDClientConfiguration ()
   {}
+
+  @NonNull
+  public static IConfigWithFallback createDefaultConfiguration ()
+  {
+    final MultiConfigurationValueProvider aVP = ConfigFactory.createDefaultValueProvider ();
+    return new ConfigWithFallback (aVP);
+  }
 
   /**
    * @return The current global configuration. Never <code>null</code>.
@@ -167,14 +132,15 @@ public final class PDClientConfiguration
   }
 
   /**
-   * @return The type to the keystore. This is usually JKS. Property <code>keystore.type</code>.
+   * @return The type of the key store as specified in the configuration file by the property
+   *         <code>keystore.type</code>. May be <code>null</code> if the property is not set or if
+   *         it contains an unknown key store type.
    */
-  @NonNull
-  @ChangeNextMajorRelease ("remove default")
+  @Nullable
   public static EKeyStoreType getKeyStoreType ()
   {
-    final String sType = getConfig ().getAsStringOrFallback ("pdclient.keystore.type", "keystore.type");
-    return EKeyStoreType.getFromIDCaseInsensitiveOrDefault (sType, EKeyStoreType.JKS);
+    final String sType = getConfig ().getAsString ("pdclient.keystore.type");
+    return EKeyStoreType.getFromIDCaseInsensitiveOrNull (sType);
   }
 
   /**
@@ -184,7 +150,7 @@ public final class PDClientConfiguration
   @Nullable
   public static String getKeyStorePath ()
   {
-    return getConfig ().getAsStringOrFallback ("pdclient.keystore.path", "keystore.path");
+    return getConfig ().getAsString ("pdclient.keystore.path");
   }
 
   /**
@@ -194,11 +160,13 @@ public final class PDClientConfiguration
   @Nullable
   public static char [] getKeyStorePassword ()
   {
-    return getConfig ().getAsCharArrayOrFallback ("pdclient.keystore.password", "keystore.password");
+    return getConfig ().getAsCharArray ("pdclient.keystore.password");
   }
 
   /**
    * @return The loaded key store and never <code>null</code>.
+   * @throws NullPointerException
+   *         If the key store type is not configured - see {@link #getKeyStoreType()}.
    */
   @NonNull
   public static LoadedKeyStore loadKeyStore ()
@@ -213,7 +181,7 @@ public final class PDClientConfiguration
   @Nullable
   public static String getKeyStoreKeyAlias ()
   {
-    return getConfig ().getAsStringOrFallback ("pdclient.keystore.key.alias", "keystore.key.alias");
+    return getConfig ().getAsString ("pdclient.keystore.key.alias");
   }
 
   /**
@@ -223,7 +191,7 @@ public final class PDClientConfiguration
   @Nullable
   public static char [] getKeyStoreKeyPassword ()
   {
-    final String ret = getConfig ().getAsStringOrFallback ("pdclient.keystore.key.password", "keystore.key.password");
+    final String ret = getConfig ().getAsString ("pdclient.keystore.key.password");
     return ret == null ? null : ret.toCharArray ();
   }
 
@@ -242,15 +210,16 @@ public final class PDClientConfiguration
   }
 
   /**
-   * @return The type to the truststore. This is usually JKS. Property <code>truststore.type</code>.
+   * @return The type of the trust store as specified in the configuration file by the property
+   *         <code>truststore.type</code>. May be <code>null</code> if the property is not set or if
+   *         it contains an unknown key store type.
    * @since 0.6.0
    */
-  @NonNull
-  @ChangeNextMajorRelease ("remove default")
+  @Nullable
   public static EKeyStoreType getTrustStoreType ()
   {
-    final String sType = getConfig ().getAsStringOrFallback ("pdclient.truststore.type", "truststore.type");
-    return EKeyStoreType.getFromIDCaseInsensitiveOrDefault (sType, DEFAULT_TRUSTSTORE_TYPE);
+    final String sType = getConfig ().getAsString ("pdclient.truststore.type");
+    return EKeyStoreType.getFromIDCaseInsensitiveOrNull (sType);
   }
 
   /**
@@ -261,7 +230,7 @@ public final class PDClientConfiguration
   @Nullable
   public static String getTrustStorePath ()
   {
-    return getConfig ().getAsStringOrFallback ("pdclient.truststore.path", "truststore.path");
+    return getConfig ().getAsString ("pdclient.truststore.path");
   }
 
   /**
@@ -272,11 +241,13 @@ public final class PDClientConfiguration
   @Nullable
   public static char [] getTrustStorePassword ()
   {
-    return getConfig ().getAsCharArrayOrFallback ("pdclient.truststore.password", "truststore.password");
+    return getConfig ().getAsCharArray ("pdclient.truststore.password");
   }
 
   /**
    * @return The loaded trust store and never <code>null</code>.
+   * @throws NullPointerException
+   *         If the trust store type is not configured - see {@link #getTrustStoreType()}.
    */
   @NonNull
   public static LoadedKeyStore loadTrustStore ()

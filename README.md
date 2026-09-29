@@ -35,7 +35,7 @@ The Directory server itself - the indexer and the publisher web application - st
 # Migration from phoss-directory
 
 Up to and including v0.19.1 these libraries were released from https://github.com/phax/phoss-directory.
-Only the Maven coordinates changed - no source code change is needed.
+The Maven coordinates changed as shown below - for the Java code itself, nothing changed.
 
 | up to v0.19.1 | since v1.0.0 |
 |---|---|
@@ -65,6 +65,12 @@ What did *not* change:
 * The configuration property names of the PD Client (`pdclient.*`) are unchanged
 * The XML Schema in `peppol-directory-searchapi` is still contained at `/schemas/directory-search-result-list-v1.xsd`
 
+Besides the coordinates, v1.0.0 contains these backwards incompatible changes - see the News section for the details:
+* The properties files `pd-client.properties` and `private-pd-client.properties` are not evaluated any more
+* The configuration properties `pdclient.keystore.type` and `pdclient.truststore.type` are mandatory now, because the implicit default `JKS` was removed
+* The old names of the `pdclient.*` properties - `keystore.type`, `truststore.path` etc. - are not evaluated as a fallback anymore
+* `PDClientConfiguration.getKeyStoreType ()` and `getTrustStoreType ()` may return `null`, and the constant `PDClientConfiguration.DEFAULT_TRUSTSTORE_TYPE` was removed
+
 The old artifacts stay available on Maven Central in their released versions, but they will not receive updates any more.
 If you import `com.helger:phoss-directory-parent-pom` as a BOM only to resolve the version of the Directory client,
   replace that import with `com.helger.peppol.directory:peppol-directory-client-parent-pom`.
@@ -85,21 +91,24 @@ The PD client is a small Java library that uses Apache HttpClient to connect to 
 The PD client uses `ph-config` to resolve configuration items.
 See https://github.com/phax/ph-commons/wiki/ph-config for the details on the resolution logic.
 
-Note: the old file `pd-client.properties` is not evaluated anymore.
+Note: the proprietary configuration files `pd-client.properties` and `private-pd-client.properties` are not
+  evaluated anymore since v1.0.0. Place the properties in `application.properties` instead.
 
 ## Client Configuration properties
 
-Note: the configuration properties were heavily renamed in v0.10.0. Previous old names are shown in brackets.
+Note: the configuration properties were heavily renamed in v0.10.0. Where an old name is still evaluated as a
+  fallback, it is shown in brackets. Since v1.0.0 the old names of the `pdclient.*` properties - the ones without the
+  `pdclient.` prefix - are not evaluated anymore.
 
 The following configuration items are supported by the PD Client:
-* **`pdclient.keystore.type`** (old: **`keystore.type`**) (since v0.6.0) - the type of the keystore. Can be `JKS` or `PKCS12` (case insensitive). Defaults to `JKS`.
-* **`pdclient.keystore.path`** (old: **`keystore.path`**) - the path to the keystore where the SMP certificate is contained
-* **`pdclient.keystore.password`** (old: **`keystore.password`**) - the password to open the key store
-* **`pdclient.keystore.key.alias`** (old: **`keystore.key.alias`**) - the alias in the key store that denotes the SMP key 
-* **`pdclient.keystore.key.password`** (old: **`keystore.key.password`**) - the password to open the key in the key store
-* **`pdclient.truststore.type`** (old: **`truststore.type`**) (since v0.6.0) - the type of the keystore. Can be `JKS` or `PKCS12` (case insensitive). Defaults to `JKS`.
-* **`pdclient.truststore.path`** (old: **`truststore.path`**) (since v0.5.1) - the path to the trust store, where the public certificates of the phoss Directory servers are contained. Defaults to `truststore/pd-client.truststore.jks`
-* **`pdclient.truststore.password`** (old: **`truststore.password`**) (since v0.5.1) - the password to open the truststore store. Defaults to `peppol`
+* **`pdclient.keystore.type`** (since v0.6.0) - the type of the keystore. Can be `JKS` or `PKCS12` (case insensitive). Mandatory since v1.0.0 - up to v0.19.1 it defaulted to `JKS`.
+* **`pdclient.keystore.path`** - the path to the keystore where the SMP certificate is contained
+* **`pdclient.keystore.password`** - the password to open the key store
+* **`pdclient.keystore.key.alias`** - the alias in the key store that denotes the SMP key 
+* **`pdclient.keystore.key.password`** - the password to open the key in the key store
+* **`pdclient.truststore.type`** (since v0.6.0) - the type of the keystore. Can be `JKS` or `PKCS12` (case insensitive). Mandatory since v1.0.0 - up to v0.19.1 it defaulted to `JKS`.
+* **`pdclient.truststore.path`** (since v0.5.1) - the path to the trust store, where the public certificates of the phoss Directory servers are contained. No default.
+* **`pdclient.truststore.password`** (since v0.5.1) - the password to open the truststore store. No default.
 * **`http.proxy.host`** (old: **`http.proxyHost`**) - the HTTP proxy host for HTTP connections only. No default.
 * **`http.proxy.port`** (old: **`http.proxyPort`**) - the HTTP proxy port for `http` connections only. No default.
 * Removed in 0.10.0: ~**`https.proxyHost`** - the HTTP proxy host for `https` connections only. No default.~
@@ -170,5 +179,9 @@ v1.0.0 - work in progress
 * Extracted `phoss-directory-client`, `phoss-directory-searchapi` and `phoss-directory-searchclient` from https://github.com/phax/phoss-directory (last common release was v0.19.1) into this repository
 * Changed the Maven group ID to `com.helger.peppol.directory` and renamed the artifact IDs from `phoss-directory-*` to `peppol-directory-*`. All package and class names are unchanged - see the [Migration](#migration-from-phoss-directory) section
 * The new parent POM is `com.helger.peppol.directory:peppol-directory-client-parent-pom` - SMP servers that import `com.helger:phoss-directory-parent-pom` as a BOM need to import the new one instead
+* Removed the support for the proprietary configuration files `pd-client.properties` and `private-pd-client.properties`. Only the `ph-config` default resolution is used now - place the properties in `application.properties` instead. The method `PDClientConfiguration.createPDClientValueProvider ()` was removed, because it only existed for that fallback
+* Removed the evaluation of the old names of the `pdclient.*` configuration properties - `keystore.type`, `keystore.path`, `keystore.password`, `keystore.key.alias`, `keystore.key.password`, `truststore.type`, `truststore.path` and `truststore.password` are not used as a fallback anymore. The old names of the `http.*` properties are still evaluated
+* Removed the implicit default `JKS` of the configuration properties `pdclient.keystore.type` and `pdclient.truststore.type`, so that a missing or unknown type is no longer silently interpreted as `JKS`. `PDClientConfiguration.getKeyStoreType ()` and `getTrustStoreType ()` are `@Nullable` now, and loading a key store without a configured type fails with a `NullPointerException` from `KeyStoreHelper`. The constant `PDClientConfiguration.DEFAULT_TRUSTSTORE_TYPE` was removed
+* Added `PDClient.toString ()`
 * Updated the JAXB binding file of `peppol-directory-searchapi` to the Jakarta EE binding namespace `https://jakarta.ee/xml/ns/jaxb` version 3.0, so that XJC no longer warns about the JAXB 2.x customization namespace
 * For the news of v0.19.1 and before see https://github.com/phax/phoss-directory
