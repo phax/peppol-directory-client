@@ -21,7 +21,7 @@ See the [Migration](#migration-from-phoss-directory) section below.
 This project is split into the following sub-projects:
 * `peppol-directory-client` - a client library to be added to SMP servers to force indexing in the PD (until v0.19.1: `phoss-directory-client`)
 * `peppol-directory-searchapi` - a library with the data structures and the constants of the Directory search REST API (since v0.7.2; until v0.19.1: `phoss-directory-searchapi`)
-* `peppol-directory-searchclient` - a client library to query the Directory search REST API (since v0.19.1; until v0.19.1: `phoss-directory-searchclient`)
+* `peppol-directory-searchclient` - a client library to query the Directory search REST API (only v0.19.1; `phoss-directory-searchclient`)
 
 The Directory server itself - the indexer and the publisher web application - stays in https://github.com/phax/phoss-directory
 
@@ -170,4 +170,5 @@ v1.0.0 - work in progress
 * Extracted `phoss-directory-client`, `phoss-directory-searchapi` and `phoss-directory-searchclient` from https://github.com/phax/phoss-directory (last common release was v0.19.1) into this repository
 * Changed the Maven group ID to `com.helger.peppol.directory` and renamed the artifact IDs from `phoss-directory-*` to `peppol-directory-*`. All package and class names are unchanged - see the [Migration](#migration-from-phoss-directory) section
 * The new parent POM is `com.helger.peppol.directory:peppol-directory-client-parent-pom` - SMP servers that import `com.helger:phoss-directory-parent-pom` as a BOM need to import the new one instead
+* Updated the JAXB binding file of `peppol-directory-searchapi` to the Jakarta EE binding namespace `https://jakarta.ee/xml/ns/jaxb` version 3.0, so that XJC no longer warns about the JAXB 2.x customization namespace
 * For the news of v0.19.1 and before see https://github.com/phax/phoss-directory
