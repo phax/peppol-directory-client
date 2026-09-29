@@ -190,7 +190,7 @@ It is used by `peppol-directory-searchclient` but can also be used stand alone -
 
 # News and noteworthy
 
-v1.0.0 - work in progress
+v1.0.0 - 2026-09-29
 * Extracted `phoss-directory-client`, `phoss-directory-searchapi` and `phoss-directory-searchclient` from https://github.com/phax/phoss-directory (last common release was v0.19.1) into this repository
 * Changed the Maven group ID to `com.helger.peppol.directory` and renamed the artifact IDs from `phoss-directory-*` to `peppol-directory-*`. All package and class names are unchanged - see the [Migration](#migration-from-phoss-directory) section
 * The new parent POM is `com.helger.peppol.directory:peppol-directory-client-parent-pom` - SMP servers that import `com.helger:phoss-directory-parent-pom` as a BOM need to import the new one instead
@@ -206,3 +206,8 @@ v1.0.0 - work in progress
 * Added the file `example-config/application.properties` that contains all supported configuration properties with dummy values, as a copy-paste template
 * Updated the JAXB binding file of `peppol-directory-searchapi` to the Jakarta EE binding namespace `https://jakarta.ee/xml/ns/jaxb` version 3.0, so that XJC no longer warns about the JAXB 2.x customization namespace
 * For the news of v0.19.1 and before see https://github.com/phax/phoss-directory
+
+---
+
+My personal [Coding Styleguide](https://github.com/phax/meta/blob/master/CodingStyleguide.md) |
+It is appreciated if you star the GitHub project if you like it.
