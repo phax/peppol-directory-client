@@ -41,8 +41,7 @@ import com.helger.security.keystore.LoadedKeyStore;
 import com.helger.url.protocol.EURLProtocol;
 
 /**
- * Special {@link HttpClientSettings} that incorporates all the parameters from
- * "pd-client.properties" file.
+ * Special {@link HttpClientSettings} that incorporates all the parameters from the configuration.
  *
  * @author Philip Helger
  */
@@ -101,9 +100,10 @@ public class PDHttpClientSettings extends HttpClientSettings
     aProxySettings.setProxyCredentials (null);
     aProxySettings.nonProxyHosts ().clear ();
 
-    // Evaluate the standardized "http.proxy.*" configuration properties.
-    // No special configuration prefix needed
-    final HttpClientConfig aHCC = HttpClientConfig.create (PDClientConfiguration.getConfig (), "");
+    // Evaluate the standardized "http.proxy.*" configuration properties. The prefix "pdclient." is
+    // checked first, so that a PD client specific proxy can be configured, before the unprefixed
+    // properties that apply to all components are used
+    final HttpClientConfig aHCC = HttpClientConfig.create (PDClientConfiguration.getConfig (), "pdclient", "");
     if (aHCC != null)
       HttpClientSettingsConfig.assignConfigValuesForProxy (aProxySettings, aHCC);
 

@@ -105,6 +105,11 @@ Note: since v1.0.0 the `http.proxy.*` properties are no longer read by the PD Cl
   properties as all the other Peppol components. The PD Client specific names `proxy.username` and `proxy.password`
   are still evaluated as deprecated legacy, and log a warning when used.
 
+Note: every `http.proxy.*` property may additionally be prefixed with `pdclient.` - e.g.
+  `pdclient.http.proxy.host`. The prefixed name is evaluated first, so a proxy that applies to all components can be
+  configured with the unprefixed name, and the PD Client can deviate from it with the prefixed name. Each property is
+  resolved on its own, so e.g. `pdclient.http.proxy.host` may be combined with an unprefixed `http.proxy.port`.
+
 The following configuration items are supported by the PD Client:
 * **`pdclient.keystore.type`** (since v0.6.0) - the type of the keystore. Can be `JKS` or `PKCS12` (case insensitive). Mandatory since v1.0.0 - up to v0.19.1 it defaulted to `JKS`.
 * **`pdclient.keystore.path`** - the path to the keystore where the SMP certificate is contained
@@ -191,6 +196,7 @@ v1.0.0 - work in progress
 * The new parent POM is `com.helger.peppol.directory:peppol-directory-client-parent-pom` - SMP servers that import `com.helger:phoss-directory-parent-pom` as a BOM need to import the new one instead
 * Removed the support for the proprietary configuration files `pd-client.properties` and `private-pd-client.properties`. Only the `ph-config` default resolution is used now - place the properties in `application.properties` instead. The method `PDClientConfiguration.createPDClientValueProvider ()` was removed, because it only existed for that fallback
 * The HTTP proxy is configured with `HttpClientSettingsConfig.assignConfigValuesForProxy (...)` of `ph-httpclient` now, instead of with custom code in `PDHttpClientSettings`. As a result, the PD Client supports the same proxy configuration properties as the other Peppol components - including the new properties `http.proxy.enabled` and `http.proxy.nonProxyHosts` as well as the alternative names `http.proxy.address`, `http.proxyUsername` and `http.proxyPassword`
+    * All proxy properties may additionally be prefixed with `pdclient.` - e.g. `pdclient.http.proxy.host` - so that the PD Client can use a different proxy than the rest of the application. The prefixed name is evaluated first, the unprefixed name second
     * The methods `PDClientConfiguration.getHttpProxyHost ()`, `getHttpProxyPort ()`, `getProxyUsername ()` and `getProxyPassword ()` are deprecated, because the proxy is not read via them anymore
     * The PD Client specific property names `proxy.username` and `proxy.password` are still evaluated as deprecated legacy - using them logs a warning. `getProxyUsername ()` and `getProxyPassword ()` only resolve these two legacy names now
     * Proxy credentials are only used if the username and the password are set - previously a username alone was sufficient
