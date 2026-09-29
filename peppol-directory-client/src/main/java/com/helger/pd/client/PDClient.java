@@ -36,6 +36,7 @@ import com.helger.annotation.style.OverrideOnDemand;
 import com.helger.base.enforce.ValueEnforcer;
 import com.helger.base.io.stream.StreamHelper;
 import com.helger.base.state.ESuccess;
+import com.helger.base.tostring.ToStringGenerator;
 import com.helger.base.url.URLHelper;
 import com.helger.httpclient.HttpClientManager;
 import com.helger.peppolid.IParticipantIdentifier;
@@ -292,5 +293,15 @@ public class PDClient implements Closeable
       m_aExceptionHdl.onException (aParticipantID, "deleteServiceGroupFromIndex", ex);
     }
     return ESuccess.FAILURE;
+  }
+
+  @Override
+  public String toString ()
+  {
+    return new ToStringGenerator (this).append ("PDHostURI", m_sPDHostURI)
+                                       .append ("PDIndexerURI", m_sPDIndexerURI)
+                                       .append ("ExceptionHdl", m_aExceptionHdl)
+                                       .append ("HttpClientMgr", m_aHttpClientMgr)
+                                       .getToString ();
   }
 }
