@@ -225,8 +225,8 @@ public class PDSearchQuery
   }
 
   /**
-   * @return <code>true</code> if the requested page lies beyond {@link CPDSearchAPI#MAX_RESULTS}, in
-   *         which case the server answers with HTTP 400.
+   * @return <code>true</code> if the requested page lies beyond {@link CPDSearchAPI#MAX_RESULTS},
+   *         in which case the server answers with HTTP 400.
    */
   public boolean isBeyondMaxResults ()
   {

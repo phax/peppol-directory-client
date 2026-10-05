@@ -284,10 +284,9 @@ public final class PDClientConfiguration
    * @return The username for proxy calls. Valid for https and https proxy. May be
    *         <code>null</code>.
    * @since 0.6.0
-   * @deprecated Since v1.0.0 - use the configuration property <code>http.proxy.username</code>
-   *             that is evaluated by {@link com.helger.httpclient.HttpClientSettingsConfig}
-   *             instead. This method only remains for the legacy property name
-   *             <code>proxy.username</code>.
+   * @deprecated Since v1.0.0 - use the configuration property <code>http.proxy.username</code> that
+   *             is evaluated by {@link com.helger.httpclient.HttpClientSettingsConfig} instead.
+   *             This method only remains for the legacy property name <code>proxy.username</code>.
    */
   @Deprecated (forRemoval = true, since = "1.0.0")
   @Nullable
@@ -300,10 +299,9 @@ public final class PDClientConfiguration
    * @return The password for proxy calls. Valid for https and https proxy. May be
    *         <code>null</code>.
    * @since 0.6.0
-   * @deprecated Since v1.0.0 - use the configuration property <code>http.proxy.password</code>
-   *             that is evaluated by {@link com.helger.httpclient.HttpClientSettingsConfig}
-   *             instead. This method only remains for the legacy property name
-   *             <code>proxy.password</code>.
+   * @deprecated Since v1.0.0 - use the configuration property <code>http.proxy.password</code> that
+   *             is evaluated by {@link com.helger.httpclient.HttpClientSettingsConfig} instead.
+   *             This method only remains for the legacy property name <code>proxy.password</code>.
    */
   @Deprecated (forRemoval = true, since = "1.0.0")
   @Nullable

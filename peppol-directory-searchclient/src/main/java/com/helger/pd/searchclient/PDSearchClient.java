@@ -38,10 +38,9 @@ import com.helger.pd.searchapi.CPDSearchAPI;
 import com.helger.pd.searchapi.v1.ResultListType;
 
 /**
- * This class is used for calling the PD search REST interface. Contrary to
- * <code>PDClient</code> of the "peppol-directory-client" submodule, that pushes indexing requests
- * and therefore needs an SMP client certificate, the search API is publicly readable and needs no
- * authentication at all.
+ * This class is used for calling the PD search REST interface. Contrary to <code>PDClient</code> of
+ * the "peppol-directory-client" submodule, that pushes indexing requests and therefore needs an SMP
+ * client certificate, the search API is publicly readable and needs no authentication at all.
  *
  * @author Philip Helger
  * @since 0.19.1

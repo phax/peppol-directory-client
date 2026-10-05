@@ -61,7 +61,9 @@ public final class PDSearchQueryTest
 
     // Non-default paging is appended
     assertEquals ("q=Helger&resultPageIndex=2&resultPageCount=50",
-                  PDSearchQuery.createGeneric ("Helger").setResultPageIndex (2).setResultPageCount (50)
+                  PDSearchQuery.createGeneric ("Helger")
+                               .setResultPageIndex (2)
+                               .setResultPageCount (50)
                                .getAsQueryString ());
   }
 
