@@ -190,6 +190,9 @@ It is used by `peppol-directory-searchclient` but can also be used stand alone -
 
 # News and noteworthy
 
+v1.0.1 - work in progress
+* Added `PDSearchClient.searchAllPages (PDSearchQuery, Function)` to retrieve multiple result pages of a search query, handing each page to a callback that may stop the iteration
+
 v1.0.0 - 2026-09-29
 * Extracted `phoss-directory-client`, `phoss-directory-searchapi` and `phoss-directory-searchclient` from https://github.com/phax/phoss-directory (last common release was v0.19.1) into this repository
 * Changed the Maven group ID to `com.helger.peppol.directory` and renamed the artifact IDs from `phoss-directory-*` to `peppol-directory-*`. All package and class names are unchanged - see the [Migration](#migration-from-phoss-directory) section

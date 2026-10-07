@@ -19,6 +19,7 @@ package com.helger.pd.searchclient;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
+import java.util.function.Function;
 
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.core5.http.io.HttpClientResponseHandler;
@@ -27,10 +28,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.helger.annotation.Nonempty;
+import com.helger.annotation.Nonnegative;
 import com.helger.annotation.concurrent.NotThreadSafe;
 import com.helger.annotation.style.OverrideOnDemand;
 import com.helger.base.enforce.ValueEnforcer;
 import com.helger.base.io.stream.StreamHelper;
+import com.helger.base.state.EContinue;
 import com.helger.base.url.URLHelper;
 import com.helger.httpclient.HttpClientManager;
 import com.helger.httpclient.HttpClientSettings;
@@ -227,5 +230,72 @@ public class PDSearchClient implements Closeable
     LOGGER.info ("PD search@" + sURL);
 
     return executeRequest (aGet, new PDSearchResponseHandler ());
+  }
+
+  /**
+   * Execute a search query for multiple result pages. This method calls
+   * {@link #search(PDSearchQuery)} for one page after another, starting at the result page index of the provided query, until the
+   * last matching result was retrieved, until the next page would lie beyond
+   * {@link CPDSearchAPI#MAX_RESULTS}, or until the provided handler asks to stop. The page size is
+   * taken from the provided query as well. The provided query itself is not modified.<br>
+   * Note: the index may be updated between one invocation and a subsequent one, so that the
+   * retrieved pages may not represent a consistent set of data.
+   *
+   * @param aQuery
+   *        The query to be executed. May not be <code>null</code> and must carry at least one query
+   *        term, because the server rejects a query without one with HTTP 400.
+   * @param aPageHandler
+   *        The handler invoked for every retrieved page, in the order in which the pages are
+   *        retrieved. It must return {@link EContinue#BREAK} to stop the iteration before the last
+   *        page was read. May not be <code>null</code>.
+   * @return The number of pages that were retrieved and handed over to the handler. Always &ge; 1.
+   * @throws PDSearchRateLimitException
+   *         If the server side rate limit was exceeded (HTTP 429). It carries the number of seconds
+   *         to wait before retrying.
+   * @throws org.apache.hc.client5.http.HttpResponseException
+   *         If the server responded with any other unexpected status code.
+   * @throws IOException
+   *         On HTTP error
+   * @since 1.0.1
+   */
+  @Nonnegative
+  public int searchAllPages (@NonNull final PDSearchQuery aQuery,
+                             @NonNull final Function <? super ResultListType, EContinue> aPageHandler) throws IOException
+  {
+    ValueEnforcer.notNull (aQuery, "Query");
+    ValueEnforcer.notNull (aPageHandler, "PageHandler");
+
+    // Work on a copy, so that the page index of the provided query is not modified
+    final PDSearchQuery aPageQuery = aQuery.getClone ();
+    int nPageCount = 0;
+    while (true)
+    {
+      final ResultListType aPage = search (aPageQuery);
+      nPageCount++;
+
+      if (aPageHandler.apply (aPage).isBreak ())
+        break;
+
+      if (aPage.getUsedResultCount () == 0 ||
+          aPage.getFirstResultIndex () + aPage.getUsedResultCount () >= aPage.getTotalResultCount ())
+      {
+        // No further result available
+        break;
+      }
+
+      aPageQuery.setResultPageIndex (aPageQuery.getResultPageIndex () + 1);
+      if (aPageQuery.isBeyondMaxResults ())
+      {
+        // The server would reject the next page with HTTP 400
+        LOGGER.info ("Stopping after " +
+                     nPageCount +
+                     " page(s), because the next page would exceed the maximum result index of " +
+                     CPDSearchAPI.MAX_RESULTS);
+        break;
+      }
+    }
+
+    LOGGER.info ("Successfully read " + nPageCount + " PD search result page(s)");
+    return nPageCount;
   }
 }
