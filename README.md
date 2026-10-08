@@ -190,21 +190,27 @@ It is used by `peppol-directory-searchclient` but can also be used stand alone -
 
 # News and noteworthy
 
-v1.0.1 - work in progress
+v1.0.1 - 2026-10-08
 * Added `PDSearchClient.searchAllPages (PDSearchQuery, Function)` to retrieve multiple result pages of a search query, handing each page to a callback that may stop the iteration
 
 v1.0.0 - 2026-09-29
 * Extracted `phoss-directory-client`, `phoss-directory-searchapi` and `phoss-directory-searchclient` from https://github.com/phax/phoss-directory (last common release was v0.19.1) into this repository
-* Changed the Maven group ID to `com.helger.peppol.directory` and renamed the artifact IDs from `phoss-directory-*` to `peppol-directory-*`. All package and class names are unchanged - see the [Migration](#migration-from-phoss-directory) section
+* Changed the Maven group ID to `com.helger.peppol.directory` and renamed the artifact IDs from `phoss-directory-*` to `peppol-directory-*`.
+  All package and class names are unchanged - see the [Migration](#migration-from-phoss-directory) section
 * The new parent POM is `com.helger.peppol.directory:peppol-directory-client-parent-pom` - SMP servers that import `com.helger:phoss-directory-parent-pom` as a BOM need to import the new one instead
-* Removed the support for the proprietary configuration files `pd-client.properties` and `private-pd-client.properties`. Only the `ph-config` default resolution is used now - place the properties in `application.properties` instead. The method `PDClientConfiguration.createPDClientValueProvider ()` was removed, because it only existed for that fallback
-* The HTTP proxy is configured with `HttpClientSettingsConfig.assignConfigValuesForProxy (...)` of `ph-httpclient` now, instead of with custom code in `PDHttpClientSettings`. As a result, the PD Client supports the same proxy configuration properties as the other Peppol components - including the new properties `http.proxy.enabled` and `http.proxy.nonProxyHosts` as well as the alternative names `http.proxy.address`, `http.proxyUsername` and `http.proxyPassword`
+* Removed the support for the proprietary configuration files `pd-client.properties` and `private-pd-client.properties`.
+  Only the `ph-config` default resolution is used now - place the properties in `application.properties` instead.
+  The method `PDClientConfiguration.createPDClientValueProvider ()` was removed, because it only existed for that fallback
+* The HTTP proxy is configured with `HttpClientSettingsConfig.assignConfigValuesForProxy (...)` of `ph-httpclient` now, instead of with custom code in `PDHttpClientSettings`.
+  As a result, the PD Client supports the same proxy configuration properties as the other Peppol components - including the new properties `http.proxy.enabled` and `http.proxy.nonProxyHosts` as well as the alternative names `http.proxy.address`, `http.proxyUsername` and `http.proxyPassword`
     * All proxy properties may additionally be prefixed with `pdclient.` - e.g. `pdclient.http.proxy.host` - so that the PD Client can use a different proxy than the rest of the application. The prefixed name is evaluated first, the unprefixed name second
     * The methods `PDClientConfiguration.getHttpProxyHost ()`, `getHttpProxyPort ()`, `getProxyUsername ()` and `getProxyPassword ()` are deprecated, because the proxy is not read via them anymore
     * The PD Client specific property names `proxy.username` and `proxy.password` are still evaluated as deprecated legacy - using them logs a warning. `getProxyUsername ()` and `getProxyPassword ()` only resolve these two legacy names now
     * Proxy credentials are only used if the username and the password are set - previously a username alone was sufficient
-* Removed the evaluation of the old names of the `pdclient.*` configuration properties - `keystore.type`, `keystore.path`, `keystore.password`, `keystore.key.alias`, `keystore.key.password`, `truststore.type`, `truststore.path` and `truststore.password` are not used as a fallback anymore. The old names of the `http.*` properties are still evaluated
-* Removed the implicit default `JKS` of the configuration properties `pdclient.keystore.type` and `pdclient.truststore.type`, so that a missing or unknown type is no longer silently interpreted as `JKS`. `PDClientConfiguration.getKeyStoreType ()` and `getTrustStoreType ()` are `@Nullable` now, and loading a key store without a configured type fails with a `NullPointerException` from `KeyStoreHelper`. The constant `PDClientConfiguration.DEFAULT_TRUSTSTORE_TYPE` was removed
+* Removed the evaluation of the old names of the `pdclient.*` configuration properties - `keystore.type`, `keystore.path`, `keystore.password`, `keystore.key.alias`, `keystore.key.password`, `truststore.type`, `truststore.path` and `truststore.password` are not used as a fallback anymore.
+  The old names of the `http.*` properties are still evaluated
+* Removed the implicit default `JKS` of the configuration properties `pdclient.keystore.type` and `pdclient.truststore.type`, so that a missing or unknown type is no longer silently interpreted as `JKS`. `PDClientConfiguration.getKeyStoreType ()` and `getTrustStoreType ()` are `@Nullable` now, and loading a key store without a configured type fails with a `NullPointerException` from `KeyStoreHelper`.
+  The constant `PDClientConfiguration.DEFAULT_TRUSTSTORE_TYPE` was removed
 * Added `PDClient.toString ()`
 * Added the file `example-config/application.properties` that contains all supported configuration properties with dummy values, as a copy-paste template
 * Updated the JAXB binding file of `peppol-directory-searchapi` to the Jakarta EE binding namespace `https://jakarta.ee/xml/ns/jaxb` version 3.0, so that XJC no longer warns about the JAXB 2.x customization namespace
