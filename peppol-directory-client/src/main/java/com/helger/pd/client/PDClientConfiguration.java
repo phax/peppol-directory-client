@@ -49,6 +49,18 @@ import com.helger.security.keystore.LoadedKeyStore;
 @ThreadSafe
 public final class PDClientConfiguration
 {
+  public static final String CONFIG_PDCLIENT_KEYSTORE_TYPE = "pdclient.keystore.type";
+  public static final String CONFIG_PDCLIENT_KEYSTORE_PATH = "pdclient.keystore.path";
+  public static final String CONFIG_PDCLIENT_KEYSTORE_PASSWORD = "pdclient.keystore.password";
+  public static final String CONFIG_PDCLIENT_KEYSTORE_KEY_ALIAS = "pdclient.keystore.key.alias";
+  public static final String CONFIG_PDCLIENT_KEYSTORE_KEY_PASSWORD = "pdclient.keystore.key.password";
+  public static final String CONFIG_PDCLIENT_TRUSTSTORE_TYPE = "pdclient.truststore.type";
+  public static final String CONFIG_PDCLIENT_TRUSTSTORE_PATH = "pdclient.truststore.path";
+  public static final String CONFIG_PDCLIENT_TRUSTSTORE_PASSWORD = "pdclient.truststore.password";
+  public static final String CONFIG_HTTP_CONNECT_TIMEOUT_MS = "http.connect.timeout.ms";
+  public static final String CONFIG_HTTP_RESPONSE_TIMEOUT_MS = "http.response.timeout.ms";
+  public static final String CONFIG_HTTPS_HOSTNAME_VERIFICATION_DISABLED = "https.hostname-verification.disabled";
+
   private static final Logger LOGGER = LoggerFactory.getLogger (PDClientConfiguration.class);
 
   private static final IConfigWithFallback DEFAULT_CONFIG = createDefaultConfiguration ();
@@ -139,7 +151,7 @@ public final class PDClientConfiguration
   @Nullable
   public static EKeyStoreType getKeyStoreType ()
   {
-    final String sType = getConfig ().getAsString ("pdclient.keystore.type");
+    final String sType = getConfig ().getAsString (CONFIG_PDCLIENT_KEYSTORE_TYPE);
     return EKeyStoreType.getFromIDCaseInsensitiveOrNull (sType);
   }
 
@@ -150,7 +162,7 @@ public final class PDClientConfiguration
   @Nullable
   public static String getKeyStorePath ()
   {
-    return getConfig ().getAsString ("pdclient.keystore.path");
+    return getConfig ().getAsString (CONFIG_PDCLIENT_KEYSTORE_PATH);
   }
 
   /**
@@ -160,7 +172,7 @@ public final class PDClientConfiguration
   @Nullable
   public static char [] getKeyStorePassword ()
   {
-    return getConfig ().getAsCharArray ("pdclient.keystore.password");
+    return getConfig ().getAsCharArray (CONFIG_PDCLIENT_KEYSTORE_PASSWORD);
   }
 
   /**
@@ -181,7 +193,7 @@ public final class PDClientConfiguration
   @Nullable
   public static String getKeyStoreKeyAlias ()
   {
-    return getConfig ().getAsString ("pdclient.keystore.key.alias");
+    return getConfig ().getAsString (CONFIG_PDCLIENT_KEYSTORE_KEY_ALIAS);
   }
 
   /**
@@ -191,7 +203,7 @@ public final class PDClientConfiguration
   @Nullable
   public static char [] getKeyStoreKeyPassword ()
   {
-    final String ret = getConfig ().getAsString ("pdclient.keystore.key.password");
+    final String ret = getConfig ().getAsString (CONFIG_PDCLIENT_KEYSTORE_KEY_PASSWORD);
     return ret == null ? null : ret.toCharArray ();
   }
 
@@ -218,7 +230,7 @@ public final class PDClientConfiguration
   @Nullable
   public static EKeyStoreType getTrustStoreType ()
   {
-    final String sType = getConfig ().getAsString ("pdclient.truststore.type");
+    final String sType = getConfig ().getAsString (CONFIG_PDCLIENT_TRUSTSTORE_TYPE);
     return EKeyStoreType.getFromIDCaseInsensitiveOrNull (sType);
   }
 
@@ -230,7 +242,7 @@ public final class PDClientConfiguration
   @Nullable
   public static String getTrustStorePath ()
   {
-    return getConfig ().getAsString ("pdclient.truststore.path");
+    return getConfig ().getAsString (CONFIG_PDCLIENT_TRUSTSTORE_PATH);
   }
 
   /**
@@ -241,7 +253,7 @@ public final class PDClientConfiguration
   @Nullable
   public static char [] getTrustStorePassword ()
   {
-    return getConfig ().getAsCharArray ("pdclient.truststore.password");
+    return getConfig ().getAsCharArray (CONFIG_PDCLIENT_TRUSTSTORE_PASSWORD);
   }
 
   /**
@@ -319,7 +331,7 @@ public final class PDClientConfiguration
   @NonNull
   public static Timeout getConnectTimeout ()
   {
-    final long nMillis = getConfig ().getAsLongOrFallback ("http.connect.timeout.ms", -1, "connect.timeout.ms");
+    final long nMillis = getConfig ().getAsLongOrFallback (CONFIG_HTTP_CONNECT_TIMEOUT_MS, -1, "connect.timeout.ms");
     if (nMillis >= 0)
       return Timeout.ofMilliseconds (nMillis);
     return HttpClientSettings.DEFAULT_CONNECT_TIMEOUT;
@@ -333,12 +345,13 @@ public final class PDClientConfiguration
   @NonNull
   public static Timeout getResponseTimeout ()
   {
-    final long nMillis = getConfig ().getAsLongOrFallback ("http.response.timeout.ms",
+    final long nMillis = getConfig ().getAsLongOrFallback (CONFIG_HTTP_RESPONSE_TIMEOUT_MS,
                                                            -1,
                                                            "http.request.timeout.ms",
                                                            "request.timeout.ms");
     if (nMillis >= 0)
       return Timeout.ofMilliseconds (nMillis);
+
     return HttpClientSettings.DEFAULT_RESPONSE_TIMEOUT;
   }
 
@@ -353,6 +366,6 @@ public final class PDClientConfiguration
    */
   public static boolean isHttpsHostnameVerificationDisabled ()
   {
-    return getConfig ().getAsBoolean ("https.hostname-verification.disabled", true);
+    return getConfig ().getAsBoolean (CONFIG_HTTPS_HOSTNAME_VERIFICATION_DISABLED, true);
   }
 }

@@ -190,6 +190,9 @@ It is used by `peppol-directory-searchclient` but can also be used stand alone -
 
 # News and noteworthy
 
+v1.0.2 - work in progress
+* Added public `CONFIG_*` constants to `PDClientConfiguration` for all configuration property names, so that they can be referenced externally
+
 v1.0.1 - 2026-10-08
 * Added `PDSearchClient.searchAllPages (PDSearchQuery, Function)` to retrieve multiple result pages of a search query, handing each page to a callback that may stop the iteration
 
