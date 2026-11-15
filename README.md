@@ -22,6 +22,7 @@ This project is split into the following sub-projects:
 * `peppol-directory-client` - a client library to be added to SMP servers to force indexing in the PD (until v0.19.1: `phoss-directory-client`)
 * `peppol-directory-searchapi` - a library with the data structures and the constants of the Directory search REST API (since v0.7.2; until v0.19.1: `phoss-directory-searchapi`)
 * `peppol-directory-searchclient` - a client library to query the Directory search REST API (only v0.19.1; `phoss-directory-searchclient`)
+* `peppol-directory-client-bom` - a Bill of Materials (BOM) that manages the versions of all the above artifacts (since v1.0.2)
 
 The Directory server itself - the indexer and the publisher web application - stays in https://github.com/phax/phoss-directory
 
@@ -42,7 +43,7 @@ The Maven coordinates changed as shown below - for the Java code itself, nothing
 | `com.helger:phoss-directory-client` | `com.helger.peppol.directory:peppol-directory-client` |
 | `com.helger:phoss-directory-searchapi` | `com.helger.peppol.directory:peppol-directory-searchapi` |
 | `com.helger:phoss-directory-searchclient` | `com.helger.peppol.directory:peppol-directory-searchclient` |
-| `com.helger:phoss-directory-parent-pom` (BOM import) | `com.helger.peppol.directory:peppol-directory-client-parent-pom` |
+| `com.helger:phoss-directory-parent-pom` (BOM import) | `com.helger.peppol.directory:peppol-directory-client-bom` (since v1.0.2; v1.0.0 and v1.0.1: `com.helger.peppol.directory:peppol-directory-client-parent-pom`) |
 
 ```xml
 <!-- until v0.19.1 -->
@@ -73,7 +74,37 @@ Besides the coordinates, v1.0.0 contains these backwards incompatible changes - 
 
 The old artifacts stay available on Maven Central in their released versions, but they will not receive updates any more.
 If you import `com.helger:phoss-directory-parent-pom` as a BOM only to resolve the version of the Directory client,
-  replace that import with `com.helger.peppol.directory:peppol-directory-client-parent-pom`.
+  replace that import with `com.helger.peppol.directory:peppol-directory-client-bom` - see the [Maven usage](#maven-usage) section.
+
+# Maven usage
+
+Since v1.0.2 the versions of all artifacts of this project are managed by the BOM `peppol-directory-client-bom`.
+Import it in the `<dependencyManagement>` section of your POM and omit the versions of the individual artifacts:
+
+```xml
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>com.helger.peppol.directory</groupId>
+      <artifactId>peppol-directory-client-bom</artifactId>
+      <version>x.y.z</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+
+<dependencies>
+  <dependency>
+    <groupId>com.helger.peppol.directory</groupId>
+    <artifactId>peppol-directory-client</artifactId>
+  </dependency>
+</dependencies>
+```
+
+The BOM only contains the artifacts of this project.
+Unlike `peppol-directory-client-parent-pom` it does not import the BOMs of third party libraries (ph-commons, ph-web, peppol-commons etc.),
+  so importing it does not override the versions of these libraries in your project.
 
 # Building requirements
 
@@ -190,7 +221,9 @@ It is used by `peppol-directory-searchclient` but can also be used stand alone -
 
 # News and noteworthy
 
-v1.0.2 - work in progress
+v1.0.2 - 2026-11-15
+* Added the new BOM artifact `com.helger.peppol.directory:peppol-directory-client-bom` that manages the versions of all artifacts of this project.
+  Import it instead of `peppol-directory-client-parent-pom` to resolve the versions of the Directory client artifacts
 * Added public `CONFIG_*` constants to `PDClientConfiguration` for all configuration property names, so that they can be referenced externally
 
 v1.0.1 - 2026-10-08
@@ -206,13 +239,16 @@ v1.0.0 - 2026-09-29
   The method `PDClientConfiguration.createPDClientValueProvider ()` was removed, because it only existed for that fallback
 * The HTTP proxy is configured with `HttpClientSettingsConfig.assignConfigValuesForProxy (...)` of `ph-httpclient` now, instead of with custom code in `PDHttpClientSettings`.
   As a result, the PD Client supports the same proxy configuration properties as the other Peppol components - including the new properties `http.proxy.enabled` and `http.proxy.nonProxyHosts` as well as the alternative names `http.proxy.address`, `http.proxyUsername` and `http.proxyPassword`
-    * All proxy properties may additionally be prefixed with `pdclient.` - e.g. `pdclient.http.proxy.host` - so that the PD Client can use a different proxy than the rest of the application. The prefixed name is evaluated first, the unprefixed name second
+    * All proxy properties may additionally be prefixed with `pdclient.` - e.g. `pdclient.http.proxy.host` - so that the PD Client can use a different proxy than the rest of the application.
+      The prefixed name is evaluated first, the unprefixed name second
     * The methods `PDClientConfiguration.getHttpProxyHost ()`, `getHttpProxyPort ()`, `getProxyUsername ()` and `getProxyPassword ()` are deprecated, because the proxy is not read via them anymore
-    * The PD Client specific property names `proxy.username` and `proxy.password` are still evaluated as deprecated legacy - using them logs a warning. `getProxyUsername ()` and `getProxyPassword ()` only resolve these two legacy names now
+    * The PD Client specific property names `proxy.username` and `proxy.password` are still evaluated as deprecated legacy - using them logs a warning.
+      `getProxyUsername ()` and `getProxyPassword ()` only resolve these two legacy names now
     * Proxy credentials are only used if the username and the password are set - previously a username alone was sufficient
 * Removed the evaluation of the old names of the `pdclient.*` configuration properties - `keystore.type`, `keystore.path`, `keystore.password`, `keystore.key.alias`, `keystore.key.password`, `truststore.type`, `truststore.path` and `truststore.password` are not used as a fallback anymore.
   The old names of the `http.*` properties are still evaluated
-* Removed the implicit default `JKS` of the configuration properties `pdclient.keystore.type` and `pdclient.truststore.type`, so that a missing or unknown type is no longer silently interpreted as `JKS`. `PDClientConfiguration.getKeyStoreType ()` and `getTrustStoreType ()` are `@Nullable` now, and loading a key store without a configured type fails with a `NullPointerException` from `KeyStoreHelper`.
+* Removed the implicit default `JKS` of the configuration properties `pdclient.keystore.type` and `pdclient.truststore.type`, so that a missing or unknown type is no longer silently interpreted as `JKS`.
+  `PDClientConfiguration.getKeyStoreType ()` and `getTrustStoreType ()` are `@Nullable` now, and loading a key store without a configured type fails with a `NullPointerException` from `KeyStoreHelper`.
   The constant `PDClientConfiguration.DEFAULT_TRUSTSTORE_TYPE` was removed
 * Added `PDClient.toString ()`
 * Added the file `example-config/application.properties` that contains all supported configuration properties with dummy values, as a copy-paste template
